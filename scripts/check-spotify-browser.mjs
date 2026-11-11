@@ -192,6 +192,9 @@ try {
   await scene('home');
   await publish({ status: 'playing', connection: 'connected', title: 'A long track title '.repeat(12), artist: 'An artist name '.repeat(10), art: '/media/spotify-99.png', actions: { previous: true, toggle: true, next: true } });
   await page.waitForFunction(() => document.getElementById('spotifyFallback').hidden === false);
+  // Slow 4K screenshots must not consume the 2.5-second idle timeout. Advance
+  // explicitly below so geometry is checked after the reveal, before collapse.
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 100));
   async function checkGlass(expanded, bg) {
     const material = await page.evaluate(expanded => {
       const image = document.getElementById(expanded ? 'spotifyGlassExpanded' : 'spotifyGlass'), stage = document.getElementById('stage');
@@ -272,6 +275,7 @@ try {
     if (amount !== 60) assert.equal(opacity.frost, 1 - amount / 100);
   }
   pass('Editor movement/resize keeps Frost registered; opacity endpoints remove or fully tint the background without fading content.');
+  await page.clock.resume();
   await scene('settings');
   assert.equal(await page.locator('.settings-group').count(), 5);
   assert.ok(await page.locator('.settings-group').last().evaluate(e => e.getBoundingClientRect().bottom < document.querySelector('.settings-overview-hint').getBoundingClientRect().top));
