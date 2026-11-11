@@ -7,7 +7,7 @@
 - Keep glass aligned with editor movement/resizing at 720p, 1080p and 4K, without runtime blur or image processing.
 - Bundle Spotify add-on 1.0.1. Existing installations, activation, account grants and appearance preferences are retained. The glass renderer requires CleanTV 0.9.1; updating the JSON add-on alone cannot change an older host.
 
-Release status: prerelease pending native TV visual verification. The stable software channel remains on 0.9.0.
+Released after native Philips TV visual acceptance on 2026-11-11. In-place update, both player states/layouts, tint/transparency controls and retained preferences/account/Home were verified; the owner confirmed display and audio. The stable software channel now serves 0.9.1. See [TV validation](docs/releases/0.9.1-tv-validation.md).
 
 ## 0.9.0
 
