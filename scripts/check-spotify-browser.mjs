@@ -192,7 +192,19 @@ try {
   await scene('home');
   await publish({ status: 'playing', connection: 'connected', title: 'A long track title '.repeat(12), artist: 'An artist name '.repeat(10), art: '/media/spotify-99.png', actions: { previous: true, toggle: true, next: true } });
   await page.waitForFunction(() => document.getElementById('spotifyFallback').hidden === false);
-  for (const width of [1920, 1280]) for (const layout of ['list', 'dock']) for (const bg of ['photo', 'light', 'dark']) {
+  async function checkGlass(expanded, bg) {
+    const material = await page.evaluate(expanded => {
+      const image = document.getElementById(expanded ? 'spotifyGlassExpanded' : 'spotifyGlass'), stage = document.getElementById('stage');
+      const r = image.getBoundingClientRect(), s = stage.getBoundingClientRect();
+      return { ready: image.complete && image.naturalWidth > 0, src: image.getAttribute('src'), display: getComputedStyle(image).display, x: r.left - s.left, y: r.top - s.top, width: r.width - s.width, veil: getComputedStyle(image.parentNode, '::before').opacity };
+    }, expanded);
+    assert.equal(material.ready, true);
+    assert.match(material.src, /alpine-field-frost\.jpg$/);
+    assert.equal(material.veil, '0.4');
+    if (bg === 'photo') for (const key of ['x', 'y', 'width']) assert.ok(Math.abs(material[key]) < 1, JSON.stringify(material));
+    else assert.equal(material.display, 'none');
+  }
+  for (const width of [1920, 1280, 3840]) for (const layout of ['list', 'dock']) for (const bg of ['photo', 'light', 'dark']) {
     await page.setViewportSize({ width, height: width * 9 / 16 });
     await page.clock.runFor(50);
     await page.waitForFunction(width => Math.abs(document.getElementById('stage').getBoundingClientRect().width - width) < 1, width);
@@ -209,12 +221,14 @@ try {
     assert.ok(await page.locator('#utils .ico').evaluateAll(icons => Math.abs(icons[icons.length - 1].getBoundingClientRect().bottom - document.getElementById('spotifyCompact').getBoundingClientRect().bottom) < 1 && icons[0].getBoundingClientRect().bottom < icons[icons.length - 1].getBoundingClientRect().top));
     assert.ok(layout === 'list' ? rects.player.right < rects.controls.left : rects.player.top > rects.dock.bottom);
     assert.equal(await page.locator('#spotifyExpanded').evaluate(e => getComputedStyle(e).visibility), 'hidden');
-    assert.deepEqual(await page.locator('.spotify-surface').evaluate(e => ({ transform: getComputedStyle(e).transform, radius: getComputedStyle(e).borderRadius, opacity: getComputedStyle(e).opacity })), { transform: 'none', radius: '24px', opacity: '0.4' });
+    assert.deepEqual(await page.locator('.spotify-surface').evaluate(e => ({ transform: getComputedStyle(e).transform, radius: getComputedStyle(e).borderRadius, opacity: getComputedStyle(e).opacity })), { transform: 'none', radius: '24px', opacity: '1' });
+    await checkGlass(false, bg);
     assert.equal((await page.evaluate(() => ShoreQA.where())).focusCount, 1);
     await page.screenshot({ path: out + `spotify-${layout}-${bg}-${width}.png`, animations: 'disabled' });
     await act('spotify.expand');
     await page.clock.runFor(450);
     await page.screenshot({ path: out + `spotify-expanded-${layout}-${bg}-${width}.png`, animations: 'disabled' });
+    await checkGlass(true, bg);
     assert.equal((await state()).focusAction, 'spotify.toggle');
     assert.equal(await page.locator('#spotifyCompact').evaluate(e => getComputedStyle(e).visibility), 'hidden');
     assert.equal(await page.locator('#spotifyExpanded').evaluate(e => getComputedStyle(e).visibility), 'visible');
@@ -242,7 +256,22 @@ try {
       await page.keyboard.press('ArrowDown');
     }
   }
-  pass('Compact and expanded player stay bottom centred in both layouts, all backgrounds, 1080p/720p; controls appear only on focus and the Dock moves clear.');
+  pass('Compact and expanded player, registered Frost and focus stay aligned in both layouts, all backgrounds, 720p/1080p/4K; controls appear only on focus and the Dock moves clear.');
+  await page.evaluate(() => ShoreQA.look({ bg: 'photo', layout: 'list' }));
+  await page.waitForFunction(() => ShoreQA.ready());
+  await page.evaluate(() => CleanFrameDesign.set({version:1,rules:[{view:'home',layout:'list',state:'*',target:'spotifyPlayer',style:{offsetX:-160,offsetY:-240,width:680,height:144,radius:32}}]}));
+  await page.clock.runFor(450);
+  await checkGlass(false, 'photo');
+  await page.evaluate(() => CleanFrameDesign.set({version:1,rules:[]}));
+  for (const amount of [0, 100, 60]) {
+    await group('spotify');
+    await page.locator('[data-action="spotify.transparency"]').evaluate((el, value) => { el.value = value; el.dispatchEvent(new Event('change', { bubbles: true })); }, amount);
+    await scene('home');
+    const opacity = await page.locator('#spotifyGlass').evaluate(e => ({ frost: +getComputedStyle(e).opacity, tint: +getComputedStyle(e.parentNode, '::before').opacity }));
+    assert.equal(opacity.tint, 1 - amount / 100);
+    if (amount !== 60) assert.equal(opacity.frost, 1 - amount / 100);
+  }
+  pass('Editor movement/resize keeps Frost registered; opacity endpoints remove or fully tint the background without fading content.');
   await scene('settings');
   assert.equal(await page.locator('.settings-group').count(), 5);
   assert.ok(await page.locator('.settings-group').last().evaluate(e => e.getBoundingClientRect().bottom < document.querySelector('.settings-overview-hint').getBoundingClientRect().top));

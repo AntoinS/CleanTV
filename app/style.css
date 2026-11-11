@@ -675,8 +675,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 @media(prefers-reduced-motion:reduce){.spotify-button{transition:opacity 300ms cubic-bezier(.22,1,.36,1)}.spotify-button:active{transform:none}}
 
 /* Bottom-centred player: compact at rest, full controls on remote focus. */
-.spotify-surface,.spotify-surface-expanded{position:absolute;left:0;right:0;bottom:0;border-radius:24px;background:var(--spotify-surface,#131209);transition:transform 400ms cubic-bezier(.22,1,.36,1),opacity 300ms cubic-bezier(.22,1,.36,1)}
-.spotify-surface{height:112px;opacity:var(--spotify-opacity,.4)}
+.spotify-surface,.spotify-surface-expanded{position:absolute;z-index:0;left:0;right:0;bottom:0;border-radius:24px;overflow:hidden;transition:transform 400ms cubic-bezier(.22,1,.36,1),opacity 300ms cubic-bezier(.22,1,.36,1)}
+/* The same registered Frost field as the Home glass, with a separate colour veil.
+   No live blur: only the two surface layers animate; content stays sharp. */
+.spotify-glass-img{position:absolute;width:1920px;height:1080px;max-width:none;object-fit:cover;opacity:var(--spotify-frost-opacity,.784)}
+.bg-dark .spotify-glass-img,.bg-light .spotify-glass-img{display:none}
+.spotify-surface::before,.spotify-surface-expanded::before,.spotify-surface::after,.spotify-surface-expanded::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;opacity:var(--spotify-opacity,.4)}
+.spotify-surface::before,.spotify-surface-expanded::before{background:var(--spotify-surface,#131209)}
+.spotify-surface::after,.spotify-surface-expanded::after{background:linear-gradient(170deg,rgba(255,255,255,.18),rgba(255,255,255,.04) 58%,rgba(255,255,255,.08))}
+.spotify-surface{height:112px;opacity:1}
 .spotify-surface-expanded{top:0;opacity:0;transform:translateY(32px) scale(.97);transform-origin:50% 100%}
 .spotify-expanded{position:absolute;left:0;right:0;bottom:0;padding:24px;opacity:0;visibility:hidden;transform:translateY(16px);transition:transform 400ms cubic-bezier(.22,1,.36,1),opacity 300ms cubic-bezier(.22,1,.36,1)}
 .spotify-compact{position:absolute;left:0;right:0;bottom:0;width:100%;height:112px;padding:16px 24px;display:flex;align-items:center;border-radius:24px;pointer-events:auto;opacity:1;transition:transform 400ms cubic-bezier(.22,1,.36,1),opacity 300ms cubic-bezier(.22,1,.36,1)}
@@ -691,7 +698,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .spotify-compact .spotify-progress{display:block;margin-top:12px;height:4px}
 .spotify-progress>span{display:block;width:100%;height:100%;background:currentColor;transform-origin:0 50%}
 .spotify-player.is-expanded .spotify-surface{opacity:0}
-.spotify-player.is-expanded .spotify-surface-expanded{opacity:var(--spotify-opacity,.4);transform:translateY(0) scale(1)}
+.spotify-player.is-expanded .spotify-surface-expanded{opacity:1;transform:translateY(0) scale(1)}
 .spotify-player.is-expanded .spotify-expanded{visibility:visible;opacity:1;transform:translateY(0);pointer-events:auto}
 .spotify-player.is-expanded .spotify-compact{visibility:hidden;opacity:0;transform:translateY(12px);pointer-events:none}
 .has-spotify.l-list .caption{max-width:880px}

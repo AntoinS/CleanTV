@@ -30,11 +30,12 @@ try{
  await key('ArrowLeft');assert.equal((await state()).spotifyTransparency,60);
  for(let n=0;n<22;n++)await key('ArrowLeft');assert.equal((await state()).spotifyTransparency,0);
  await scene('home');await page.waitForTimeout(350);
- assert.equal(await page.locator('.spotify-surface').evaluate(e=>getComputedStyle(e).opacity),'1');
+ assert.equal(await page.locator('.spotify-surface').evaluate(e=>getComputedStyle(e,'::before').opacity),'1');
  await group('spotify');await act('spotify.transparency');for(let n=0;n<22;n++)await key('ArrowRight');
  assert.equal((await state()).spotifyTransparency,100);
  await scene('home');await page.waitForTimeout(350);
- assert.equal(await page.locator('.spotify-surface').evaluate(e=>getComputedStyle(e).opacity),'0');
+ assert.equal(await page.locator('.spotify-surface').evaluate(e=>getComputedStyle(e,'::before').opacity),'0');
+ assert.equal(await page.locator('#spotifyGlass').evaluate(e=>getComputedStyle(e).opacity),'0');
  assert.equal(await page.locator('#spotifyCompactTitle').isVisible(),true);
  await group('spotify');await act('spotify.transparency');for(let n=0;n<5;n++)await key('ArrowLeft');
  await page.evaluate(()=>{window.__save=Storage.prototype.setItem;Storage.prototype.setItem=()=>{throw Error('Full');};});

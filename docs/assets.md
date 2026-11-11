@@ -19,6 +19,12 @@ Omit the argument to regenerate every catalogue entry. Output goes to ignored `.
 
 All fields use the centred 1920 x 1080 crop. The small panel backdrop comes from that same Frost field. The six new backgrounds use baseline sRGB JPEG at quality 90 with full chroma; thumbnails use quality 85. Their originals remain unchanged.
 
+The Spotify player also uses the registered Frost field in both compact and expanded
+surfaces. It loads atomically with the wallpaper and follows the final editor geometry.
+Dark, light and cover colour remain separate tint layers; the existing transparency
+setting fades both tint and diffusion to zero at 100%. Flat backgrounds omit the photo
+field. Cover art and text are outside these layers and remain sharp and opaque.
+
 `app/assets/wallpapers/catalog.js` stores names and surface parameters; `app/assets/adaptive-ink.js` stores offline colour choices. New photographs need a rendered review of their List, Dock, clock, controls and all three materials before their metadata is accepted. An average image colour alone does not establish readable text.
 
 ## Icon metrics

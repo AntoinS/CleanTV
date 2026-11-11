@@ -50,7 +50,7 @@
     var back = document.getElementById('sheet'), decoration = context.view !== 'home' && context.view !== 'qr' && back && !back.hidden ? [back, document.getElementById('sheetBg'), back.querySelector('.sheet-veil')] : [];
     var candidates = decoration.concat([base]).concat(Array.prototype.slice.call(base.querySelectorAll('[id], [data-action], [data-slot], h2, h3, p, span, svg, img, button, section, .setting-options, .setting-slider, .spotify-track, .spotify-copy, .spotify-art, .spotify-times, .spotify-surface, .spotify-surface-expanded, .spotify-compact-art, .spotify-compact-copy')));
     candidates.forEach(function (el) {
-      if (!visible(el, true) || /^(path|rect|circle|g)$/i.test(el.tagName) || el.closest('.ph-field,.mat,.ut-lens,#phPlate,#phPlateAlt')) return;
+      if (!visible(el, true) || /^(path|rect|circle|g)$/i.test(el.tagName) || el.closest('.ph-field,.mat,.ut-lens,#phPlate,#phPlateAlt,.spotify-glass-img')) return;
       if (['home', 'track', 'phRows', 'shelf', 'phScene', 'scene'].indexOf(el.id) >= 0) return;
       var id = key(el), action = el.getAttribute('data-action'), parent = el.parentElement, parentId = null;
       while (parent && parent !== base.parentElement) { if (parent.getAttribute('data-design-id')) { parentId = parent.getAttribute('data-design-id'); break; } parent = parent.parentElement; }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.1 — 2026-11-11
+
+- Give compact and expanded Spotify players the same prepared Frost material as Home, with a milky glass veil and aligned wallpaper details.
+- Retain dark, light and cover tint plus the saved transparency setting; 100% removes the entire surface while text and artwork stay opaque.
+- Keep glass aligned with editor movement/resizing at 720p, 1080p and 4K, without runtime blur or image processing.
+- Bundle Spotify add-on 1.0.1. Existing installations, activation, account grants and appearance preferences are retained. The glass renderer requires CleanTV 0.9.1; updating the JSON add-on alone cannot change an older host.
+
+Release status: prerelease pending native TV visual verification. The stable software channel remains on 0.9.0.
+
 ## 0.9.0
 
 - Show the installed CleanTV version in the settings footer and open a software-update detail page.

@@ -1180,7 +1180,7 @@
   var utPlates = [$('utLens'), $('utLensAlt')], utFields = [$('utField'), $('utFieldAlt')], utPlateIndex = 0, utPlateKey = null;
   var photoMode = null, photoTransitionToken = 0;
   var sheetEl = $('sheet'), sheetView = $('sheetView');
-  var IMG = { photo: $('photo'), mat: $('matImg'), bg: $('sheetBg'), field: $('phFieldImg'), fieldAlt: $('phFieldImgAlt'), utility: $('utFieldImg'), utilityAlt: $('utFieldImgAlt') };
+  var IMG = { photo: $('photo'), mat: $('matImg'), bg: $('sheetBg'), field: $('phFieldImg'), fieldAlt: $('phFieldImgAlt'), utility: $('utFieldImg'), utilityAlt: $('utFieldImgAlt'), spotify: $('spotifyGlass'), spotifyExpanded: $('spotifyGlassExpanded') };
   var sheetKey = '', slotEls = {}, dockEdgeFrame = 0, dockEdgeUntil = 0, dockAnchorCenter = 960;
   var appliedPalette = null, appliedPhoto = null, appliedFont = null, appliedFontMetrics = null;
 
@@ -1231,6 +1231,7 @@
     ADDONS.render(t.id === 'home' && !spotifyExpanded(), S.c.language);
     syncSpotify();
     if (window.CleanFrameDesign) window.CleanFrameDesign.after({ view: t.id === 'appearance' ? 'appearance.' + t.group : t.id === 'message' ? 'message.' + t.msg : t.id, layout: S.c.layout, state: spotifyExpanded() ? 'expanded' : 'compact' });
+    alignSpotifyGlass();
   }
 
   function applyHomeFont() {
@@ -1339,6 +1340,17 @@
     $('spotifyDuration').textContent = duration ? mediaTime(duration) : '';
     if (spotifyState.status === 'playing') spotifyTimer = setTimeout(spotifyProgress, 1000);
   }
+  function alignSpotifyGlass() {
+    if (spotifyEl.hidden || S.c.bg !== 'photo' || !spotifyEl.offsetWidth) return;
+    var bounds = spotifyEl.getBoundingClientRect(), stageBounds = stage.getBoundingClientRect(), scale = stageBounds.width / 1920;
+    if (!scale) return;
+    // Use the final editor geometry, excluding the surfaces' reveal animation.
+    ['spotify', 'spotifyExpanded'].forEach(function (key) {
+      var image = IMG[key], surface = image.parentNode;
+      image.style.left = -((bounds.left - stageBounds.left) / scale + surface.offsetLeft) + 'px';
+      image.style.top = -((bounds.top - stageBounds.top) / scale + surface.offsetTop) + 'px';
+    });
+  }
   function renderSpotify() {
     var visible = spotifyVisible(), expanded = spotifyExpanded(), t = top(), art = typeof spotifyState.art === 'string' && /^\/media\/spotify-[0-9]+\.png$/.test(spotifyState.art) ? spotifyState.art : '';
     if (!visible || t.id !== 'home' || t.f.zone !== 'spotify') { clearTimeout(spotifyIdleTimer); spotifyIdleTimer = 0; spotifyAwake = false; expanded = false; }
@@ -1347,6 +1359,8 @@
     var backdropInk = palette && palette.br ? palette.br.pol : backdrop.ut.br;
     spotifyEl.style.setProperty('--spotify-surface', surface === 'light' ? '#f4f4f1' : surface === 'cover' ? colour : '#131209');
     spotifyEl.style.setProperty('--spotify-opacity', String(1 - S.c.spotifyTransparency / 100));
+    // Keep the wallpaper softly diffused as the colour veil fades; 100% is clear.
+    spotifyEl.style.setProperty('--spotify-frost-opacity', String(1 - Math.pow(S.c.spotifyTransparency / 100, 3)));
     // Opaque cards use their surface ink; transparent cards reuse the prepared backdrop ink.
     spotifyEl.classList.toggle('is-light', S.c.spotifyTransparency <= 40 ? surface === 'light' || surface === 'cover' && spotifyState.artLight : S.c.bg === 'light' || S.c.bg === 'photo' && /^dark/.test(backdropInk));
     spotifyEl.style.textShadow = S.c.bg === 'photo' && palette && palette.br ? palette.br.shadow : 'none';
@@ -2060,6 +2074,8 @@
     imgs.fieldAlt = makeImg('ph-field-img', fieldSrc(look.wall, look.material));
     imgs.utility = makeImg('ph-field-img', fieldSrc(look.wall, look.material));
     imgs.utilityAlt = makeImg('ph-field-img', fieldSrc(look.wall, look.material));
+    imgs.spotify = makeImg('spotify-glass-img', fieldSrc(look.wall, 'frost'));
+    imgs.spotifyExpanded = makeImg('spotify-glass-img', fieldSrc(look.wall, 'frost'));
     keys = Object.keys(imgs); left = keys.length;
     keys.forEach(function (k) { whenReady(imgs[k], function (ok) {
       allOk = allOk && ok;
